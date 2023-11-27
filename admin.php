@@ -1,8 +1,13 @@
 <?php
 session_start();
+if(!array_key_exists("user",$_SESSION)) {
+    header('Location: connection.php');
+    exit();
+}
 include ("blocks/function.php");
 $pdo = dbconnect();
 $errors = [];
+
 if (array_key_exists("suprimer",$_GET)){
     $query = $pdo->prepare("DELETE  FROM users WHERE id = :id");
     $query->execute(["id"=>$_GET['suprimer']]);
@@ -35,20 +40,42 @@ include "blocks/header.php";
     <div class="">
         <h4 class="text-dark">Ajouter un Joueur</h4>
         <?php
-
+        $allwoedExtension =["image/jpeg","image/png"];
         if($_SERVER["REQUEST_METHOD"]=="POST") {
-                $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`) VALUES (:name, :firstname, :date_of_birth, :poste)");
+            $query = $pdo->query('SELECT * FROM users');
+            $resultas = $query->fetchAll();
+            if ($_FILES["photos"]["error"] != 0){
+                $errors [] ="inconu";
+            }
+            if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
+                if ($_FILES["photos"]["size"]>2097152){
+                    $errors [] = "tros grosse";
+                }
+            }else{
+                $errors [] = "Pas bon";
+            }
+            if (count($resultas) < 23 && count($errors)== 0) {
+                $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
+                move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
+                $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
                 $qury ->execute([
                     "name"=>$_POST['name'],
                     "firstname"=>$_POST['lastname'],
                     "date_of_birth"=>$_POST['date_of_birth'],
                     "poste"=>$_POST['type'],
+                    "image"=>$nameAssets,
                 ]);
                 header('Location: index.php');
                 exit();
+            }else{
+                $errors ["result"] = "La limite de 23 joueur et atteinte";
+            }
+
         }
+
+
         ?>
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             <input class="form-control <?php
             if(array_key_exists("lastname",$errors)){
                 echo('is-invalid');
@@ -110,7 +137,7 @@ include "blocks/header.php";
                 ?>
             </div>
             <!---------------------------------------------------------------------------->
-            <select  name="type" class="form-select">
+            <select name="type" class="form-select mb-3">
                 <option></option>
                 <?php
                 $types = ["Gardien de but","Attaquant","Milieux défensifs"];
@@ -120,10 +147,19 @@ include "blocks/header.php";
                     }
                     echo('<option value="'.$type.'">'.$type.'</option>');
                 }
-
                 ?></select>
             <!---------------------------------------------------------------------------->
+            <input type="file" class="form-control" name="photos">
+
+            <!---------------------------------------------------------------------------->
             <button type="submit">Ajouter un Joueur</button>
+            <?php
+            if (count($errors) > 0) {
+                foreach ($errors as $error) {
+                    echo('<div>' . $error . '</div>');
+                }
+            }
+            ?>
         </form>
     </div>
 </section>

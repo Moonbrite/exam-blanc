@@ -1,5 +1,9 @@
 <?php
 session_start();
+if(!array_key_exists("user",$_SESSION)) {
+    header('Location: connection.php');
+    exit();
+}
 include ("blocks/function.php");
 $pdo = dbconnect();
 $errors = [];
@@ -8,7 +12,6 @@ if (array_key_exists("modifier",$_GET)){
     $query = $pdo->prepare("SELECT * FROM users WHERE id = :id");
     $query->execute(["id"=>$_GET['modifier']]);
     $result = $query->fetch();
-    var_dump($result);
 }
 ?>
 <!doctype html>
@@ -35,20 +38,37 @@ include "blocks/header.php";
     <div class="">
         <h4 class="text-dark">Ajouter un Joueur</h4>
         <?php
-
+        $allwoedExtension =["image/jpeg","image/png"];
         if($_SERVER["REQUEST_METHOD"]=="POST") {
-            var_dump($_POST['date_of_birth']);
-            $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste   WHERE  id = :id;");
-            $qury ->execute([
-                "id"=>$_GET['modifier'],
-                "name"=>$_POST['name'],
-                "firstname"=>$_POST['lastname'],
-                "date_of_birth"=>$_POST['date_of_birth'],
-                "poste"=>$_POST['type'],
-            ]);
+            if ($_FILES["photos"]["error"] != 0){
+                $errors [] ="inconu";
+            }
+            if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
+                if ($_FILES["photos"]["size"]>2097152){
+                    $errors [] = "tros grosse";
+                }
+            }else{
+                $errors [] = "Pas bon";
+            }
+            if (count($errors)== 0) {
+                var_dump($_FILES);
+                $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
+                move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
+                $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste , image = :image   WHERE  id = :id;");
+                $qury ->execute([
+                    "id"=>$_GET['modifier'],
+                    "name"=>$_POST['name'],
+                    "firstname"=>$_POST['lastname'],
+                    "date_of_birth"=>$_POST['date_of_birth'],
+                    "poste"=>$_POST['type'],
+                    "image"=>$nameAssets,
+                ]);
+                header('Location: index.php');
+                exit();
+            }
         }
         ?>
-        <form action="" method="post">
+        <form action="" method="post" enctype="multipart/form-data">
             <input class="form-control <?php
             if(array_key_exists("lastname",$errors)){
                 echo('is-invalid');
@@ -110,7 +130,7 @@ include "blocks/header.php";
                 ?>
             </div>
             <!---------------------------------------------------------------------------->
-            <select  name="type" class="form-select">
+            <select  name="type" class="form-select mb-3">
                 <option><?php echo($result["poste"]) ?></option>
                 <?php
                 $types = ["Gardien de but","Attaquant","Milieux défensifs"];
@@ -123,7 +143,18 @@ include "blocks/header.php";
 
                 ?></select>
             <!---------------------------------------------------------------------------->
+            <input type="file" class="form-control mb-3" name="photos">
+            <!---------------------------------------------------------------------------->
             <button type="submit">Crée votre compte</button>
+            <ul>
+                <?php
+                if(count($errors) != 0){
+                    foreach ($errors as $error){
+                        echo("<li>".$error."</li>");
+                    }
+                }
+                ?>
+            </ul>
         </form>
     </div>
 </section>

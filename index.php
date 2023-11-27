@@ -34,23 +34,22 @@ var_dump($_SESSION);
 <div class="container row ">
     <?php
     foreach ($resultas as $resulta){
+        $nomPernom = $resulta["name"]." ".$resulta["firstname"];
         echo ('<div class="col-3 m-auto mt-5"><div class="card">
-    <img src="'.$resulta["image"].'" class="card-img-top" alt="...">
-    <div class="card-body">
-        <h5 class="card-title">'.$resulta["name"].$resulta["firstname"].'</h5>
-        <p class="card-text">Date de Naisance : '.$resulta["date_of_birth"].'</p>
-        <p class="card-text">Poste : '.$resulta["poste"].'</p>');
+        <img src="'.htmlspecialchars($resulta["image"]).'" class="card-img-top" alt="...">
+        <div class="card-body">
+        <h5 class="card-title">'.htmlspecialchars($nomPernom).'</h5>
+        <p class="card-text">Date de Naisance : '.htmlspecialchars($resulta["date_of_birth"]).'</p>
+        <p class="card-text">Poste : '.htmlspecialchars($resulta["poste"]).'</p>');
         if (array_key_exists("user",$_SESSION)) {
-            echo ('<a class="btn btn-danger" href="?suprimer='.$resulta["id"].'">Suprimer le joueur</a>
-                    <a class="btn btn-success mt-2" href="edit.php?modifier='.$resulta["id"].'">Modifier le joueur</a>');
+            echo ('<a class="btn btn-danger" href="?suprimer='.htmlspecialchars($resulta["id"]).'">Suprimer le joueur</a>
+                    <a class="btn btn-success mt-2" href="edit.php?modifier='.htmlspecialchars($resulta["id"]).'">Modifier le joueur</a>');
         }
   echo ('</div>
 </div></div>');
     }
     ?>
 </div>
-
-
 
 <?php
 include "blocks/js.php";
