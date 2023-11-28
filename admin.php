@@ -8,13 +8,6 @@ include ("blocks/function.php");
 $pdo = dbconnect();
 $errors = [];
 
-if (array_key_exists("suprimer",$_GET)){
-    $query = $pdo->prepare("DELETE  FROM users WHERE id = :id");
-    $query->execute(["id"=>$_GET['suprimer']]);
-    $result = $query->fetch();
-    header("Location:index.php");
-    exit();
-}
 ?>
 <!doctype html>
 <html lang="fr">
@@ -33,17 +26,17 @@ if (array_key_exists("suprimer",$_GET)){
 include "blocks/header.php";
 ?>
 
-<h1>Bonjour <?php
+<h1 class="text-center">Bonjour <?php
  echo ($_SESSION["user"]);
     ?></h1>
 <section class="login-container">
     <div class="">
         <h4 class="text-dark">Ajouter un Joueur</h4>
         <?php
-        $allwoedExtension =["image/jpeg","image/png"];
+        $query = $pdo->query('SELECT * FROM users');
+        $resultas = $query->fetchAll();
+        $allwoedExtension =["image/jpeg","image/png","image/webp"];
         if($_SERVER["REQUEST_METHOD"]=="POST") {
-            $query = $pdo->query('SELECT * FROM users');
-            $resultas = $query->fetchAll();
             if ($_FILES["photos"]["error"] != 0){
                 $errors [] ="inconu";
             }
@@ -54,7 +47,7 @@ include "blocks/header.php";
             }else{
                 $errors [] = "Pas bon";
             }
-            if (count($resultas) < 23 && count($errors)== 0) {
+            if (count($resultas) < 23 && count($errors) == 0) {
                 $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
                 move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
                 $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
@@ -76,6 +69,12 @@ include "blocks/header.php";
 
         ?>
         <form action="" method="post" enctype="multipart/form-data">
+            <p>Nombre de joueur max : <br>
+                <?php
+                echo (count($resultas));
+                ?>
+                /23
+            </p>
             <input class="form-control <?php
             if(array_key_exists("lastname",$errors)){
                 echo('is-invalid');
@@ -140,7 +139,7 @@ include "blocks/header.php";
             <select name="type" class="form-select mb-3">
                 <option></option>
                 <?php
-                $types = ["Gardien de but","Attaquant","Milieux défensifs"];
+                $types = ["Gardien","Attaquant","Milieu","Défenseur"];
                 foreach($types as $type){
                     if($_SERVER["REQUEST_METHOD"]=='POST' && $_POST["type"] == $type){
                         $actif = 'selected';
@@ -149,7 +148,7 @@ include "blocks/header.php";
                 }
                 ?></select>
             <!---------------------------------------------------------------------------->
-            <input type="file" class="form-control" name="photos">
+            <input type="file" class="form-control mb-3" name="photos">
 
             <!---------------------------------------------------------------------------->
             <button type="submit">Ajouter un Joueur</button>
@@ -162,6 +161,7 @@ include "blocks/header.php";
             ?>
         </form>
     </div>
+
 </section>
 
 <?php

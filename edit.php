@@ -8,11 +8,14 @@ include ("blocks/function.php");
 $pdo = dbconnect();
 $errors = [];
 
-if (array_key_exists("modifier",$_GET)){
-    $query = $pdo->prepare("SELECT * FROM users WHERE id = :id");
-    $query->execute(["id"=>$_GET['modifier']]);
-    $result = $query->fetch();
+if(array_key_exists("user",$_SESSION)) {
+    if (array_key_exists("modifier",$_GET)){
+        $query = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+        $query->execute(["id"=>$_GET['modifier']]);
+        $result = $query->fetch();
+    }
 }
+
 ?>
 <!doctype html>
 <html lang="fr">
@@ -36,7 +39,7 @@ include "blocks/header.php";
     ?></h1>
 <section class="login-container">
     <div class="">
-        <h4 class="text-dark">Ajouter un Joueur</h4>
+        <h4 class="text-dark">Modifier le Joueur</h4>
         <?php
         $allwoedExtension =["image/jpeg","image/png"];
         if($_SERVER["REQUEST_METHOD"]=="POST") {
@@ -79,6 +82,9 @@ include "blocks/header.php";
             if(empty($_POST['lastname'])){
                 echo($result['firstname']);
             }
+            elseif(!empty($_POST['lastname'] && $_SERVER["REQUEST_METHOD"]=='POST')){
+                echo($_POST['lastname']);
+            }
             ?>"/>
             <div class='invalid-feedback msg'>
                 <?php
@@ -99,6 +105,9 @@ include "blocks/header.php";
             ?>" type="text" name="name" placeholder="Prenom" required="required" value="<?php
             if(empty($_POST['name'])){
                 echo($result['name']);
+            }
+            elseif(!empty($_POST['name'] && $_SERVER["REQUEST_METHOD"]=='POST')){
+                echo($_POST['name']);
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -121,6 +130,9 @@ include "blocks/header.php";
             if(empty($_POST['date_of_birth'])){
                 echo($result['date_of_birth']);
             }
+            elseif(!empty($_POST['date_of_birth'] && $_SERVER["REQUEST_METHOD"]=='POST')){
+                echo($_POST['date_of_birth']);
+            }
             ?>"/>
             <div class='invalid-feedback msg'>
                 <?php
@@ -130,22 +142,22 @@ include "blocks/header.php";
                 ?>
             </div>
             <!---------------------------------------------------------------------------->
+
             <select  name="type" class="form-select mb-3">
-                <option><?php echo($result["poste"]) ?></option>
                 <?php
-                $types = ["Gardien de but","Attaquant","Milieux défensifs"];
+                $types = ["Gardien","Attaquant","Milieu","Défenseur"];
                 foreach($types as $type){
-                    if($_SERVER["REQUEST_METHOD"]=='POST' && $_POST["type"] == $type){
+                    $actif = '';
+                    if($_SERVER["REQUEST_METHOD"]=='POST' && $_POST["type"] == $type || $result["poste"] == $type){
                         $actif = 'selected';
                     }
-                    echo('<option value="'.$type.'">'.$type.'</option>');
+                    echo('<option '.$actif.' value="'.$type.'">'.$type.'</option>');
                 }
-
                 ?></select>
             <!---------------------------------------------------------------------------->
             <input type="file" class="form-control mb-3" name="photos">
             <!---------------------------------------------------------------------------->
-            <button type="submit">Crée votre compte</button>
+            <button type="submit">Modifier le Joueur</button>
             <ul>
                 <?php
                 if(count($errors) != 0){
@@ -158,6 +170,9 @@ include "blocks/header.php";
         </form>
     </div>
 </section>
+
+
+
 
 <?php
 include "blocks/js.php";
