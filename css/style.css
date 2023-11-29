@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   font-family: "Poppins", sans-serif;
   margin: 0;
@@ -95,6 +96,31 @@ form button[type=submit] {
 form button[type=submit]:focus,
 form button[type=submit]:hover {
   background-color: #d35400;
+}
+
+.img-previsu {
+  max-width: 150px;
+}
+
+.card img {
+  height: 230px;
+  object-fit: cover;
+}
+
+.Attaquant {
+  color: red;
+}
+
+.Défenseur {
+  color: #00a5ff;
+}
+
+.Gardien {
+  color: #e1d000;
+}
+
+.Milieu {
+  color: darkgreen;
 }
 
 /*# sourceMappingURL=style.css.map */

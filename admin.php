@@ -1,12 +1,42 @@
 <?php
 session_start();
-if(!array_key_exists("user",$_SESSION)) {
-    header('Location: connection.php');
-    exit();
-}
 include ("blocks/function.php");
+include "blocks/redirection.php";
+redirectionConnectionIsConected();
 $pdo = dbconnect();
 $errors = [];
+
+$query = $pdo->query('SELECT * FROM users');
+$resultas = $query->fetchAll();
+$allwoedExtension = ["image/jpeg", "image/png", "image/webp"];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_FILES["photos"]["error"] != 0) {
+        $errors [] = "inconu";
+    }
+    if (in_array($_FILES["photos"]["type"], $allwoedExtension)) {
+        if ($_FILES["photos"]["size"] > 2097152) {
+            $errors [] = "tros grosse";
+        }
+    } else {
+        $errors [] = "Pas bon";
+    }
+    if (count($resultas) < 23 && count($errors) == 0) {
+        $nameAssets = "assets/" . uniqid() . '-' . $_FILES["photos"]["name"];
+        move_uploaded_file($_FILES["photos"]["tmp_name"], $nameAssets);
+        $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
+        $qury->execute([
+            "name" => $_POST['name'],
+            "firstname" => $_POST['lastname'],
+            "date_of_birth" => $_POST['date_of_birth'],
+            "poste" => $_POST['type'],
+            "image" => $nameAssets,
+        ]);
+        redirectionIndex();
+    } else {
+        $errors ["result"] = "La limite de 23 joueur et atteinte";
+    }
+}
+
 
 ?>
 <!doctype html>
@@ -32,42 +62,7 @@ include "blocks/header.php";
 <section class="login-container">
     <div class="">
         <h4 class="text-dark">Ajouter un Joueur</h4>
-        <?php
-        $query = $pdo->query('SELECT * FROM users');
-        $resultas = $query->fetchAll();
-        $allwoedExtension =["image/jpeg","image/png","image/webp"];
-        if($_SERVER["REQUEST_METHOD"]=="POST") {
-            if ($_FILES["photos"]["error"] != 0){
-                $errors [] ="inconu";
-            }
-            if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
-                if ($_FILES["photos"]["size"]>2097152){
-                    $errors [] = "tros grosse";
-                }
-            }else{
-                $errors [] = "Pas bon";
-            }
-            if (count($resultas) < 23 && count($errors) == 0) {
-                $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
-                move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
-                $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
-                $qury ->execute([
-                    "name"=>$_POST['name'],
-                    "firstname"=>$_POST['lastname'],
-                    "date_of_birth"=>$_POST['date_of_birth'],
-                    "poste"=>$_POST['type'],
-                    "image"=>$nameAssets,
-                ]);
-                header('Location: index.php');
-                exit();
-            }else{
-                $errors ["result"] = "La limite de 23 joueur et atteinte";
-            }
 
-        }
-
-
-        ?>
         <form action="" method="post" enctype="multipart/form-data">
             <p>Nombre de joueur max : <br>
                 <?php

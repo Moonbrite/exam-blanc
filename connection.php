@@ -1,5 +1,9 @@
 <?php
 session_start();
+if(array_key_exists("user",$_SESSION)) {
+    header('Location: index.php');
+    exit();
+}
 $error =null;
 if($_SERVER["REQUEST_METHOD"]=="POST"){
     if($_POST["user"] == "ddechamps" && $_POST ["password"] == "ddechamps") {

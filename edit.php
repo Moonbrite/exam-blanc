@@ -16,6 +16,35 @@ if(array_key_exists("user",$_SESSION)) {
     }
 }
 
+$allwoedExtension =["image/jpeg","image/png"];
+if($_SERVER["REQUEST_METHOD"]=="POST") {
+    if ($_FILES["photos"]["error"] != 0){
+         $errors [] ="inconu";
+     }
+     if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
+         if ($_FILES["photos"]["size"]>2097152){
+             $errors [] = "tros grosse";
+         }
+     }else{
+         $errors [] = "Pas bon";
+     }
+    if (count($errors)== 0 and $_FILES["image"]["error"] != 4) {
+        var_dump($_FILES);
+        $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
+        move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
+        $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste , image = :image   WHERE  id = :id;");
+        $qury ->execute([
+            "id"=>$_GET['modifier'],
+            "name"=>$_POST['name'],
+            "firstname"=>$_POST['lastname'],
+            "date_of_birth"=>$_POST['date_of_birth'],
+            "poste"=>$_POST['type'],
+            "image"=>$nameAssets,
+        ]);
+        header('Location: index.php');
+        exit();
+    }
+}
 ?>
 <!doctype html>
 <html lang="fr">
@@ -41,35 +70,6 @@ include "blocks/header.php";
     <div class="">
         <h4 class="text-dark">Modifier le Joueur</h4>
         <?php
-        $allwoedExtension =["image/jpeg","image/png"];
-        if($_SERVER["REQUEST_METHOD"]=="POST") {
-            if ($_FILES["photos"]["error"] != 0){
-                $errors [] ="inconu";
-            }
-            if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
-                if ($_FILES["photos"]["size"]>2097152){
-                    $errors [] = "tros grosse";
-                }
-            }else{
-                $errors [] = "Pas bon";
-            }
-            if (count($errors)== 0) {
-                var_dump($_FILES);
-                $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
-                move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
-                $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste , image = :image   WHERE  id = :id;");
-                $qury ->execute([
-                    "id"=>$_GET['modifier'],
-                    "name"=>$_POST['name'],
-                    "firstname"=>$_POST['lastname'],
-                    "date_of_birth"=>$_POST['date_of_birth'],
-                    "poste"=>$_POST['type'],
-                    "image"=>$nameAssets,
-                ]);
-                header('Location: index.php');
-                exit();
-            }
-        }
         ?>
         <form action="" method="post" enctype="multipart/form-data">
             <input class="form-control <?php
@@ -154,7 +154,14 @@ include "blocks/header.php";
                     echo('<option '.$actif.' value="'.$type.'">'.$type.'</option>');
                 }
                 ?></select>
+
             <!---------------------------------------------------------------------------->
+            <div>
+
+                <?php
+                echo ('<img class="img-previsu img-thumbnail" src="'.$result["image"].'" alt="">');
+                ?>
+            </div>
             <input type="file" class="form-control mb-3" name="photos">
             <!---------------------------------------------------------------------------->
             <button type="submit">Modifier le Joueur</button>

@@ -2,20 +2,20 @@
 session_start();
 include "blocks/function.php";
 $pdo = dbconnect();
-if (array_key_exists("attq",$_GET)) {
-    $query = $pdo->query('SELECT * FROM users WHERE poste ="Attaquant"');
+if (array_key_exists("postes",$_GET)) {
+    $query = $pdo->prepare('SELECT * FROM users WHERE poste = :poste');
+    $query->execute(["poste" => $_GET['postes']]);
     $resultas = $query->fetchAll();
-}elseif(array_key_exists("def",$_GET)) {
-    $query = $pdo->query('SELECT * FROM users WHERE poste ="Défenseur"');
-    $resultas = $query->fetchAll();
-}elseif(array_key_exists("Gardien",$_GET)) {
-    $query = $pdo->query('SELECT * FROM users WHERE poste ="Gardien"');
-    $resultas = $query->fetchAll();
-}elseif(array_key_exists("Milieu",$_GET)) {
-    $query = $pdo->query('SELECT * FROM users WHERE poste ="Milieu"');
-    $resultas = $query->fetchAll();
-}elseif(array_key_exists("rien",$_GET)) {
+}else{
     $query = $pdo->query('SELECT * FROM users ORDER BY poste');
+    $resultas = $query->fetchAll();
+}
+if (array_key_exists("ages", $_GET)) {
+    // Assurez-vous que la valeur passée dans $_GET['ages'] est soit "ASC" soit "DESC"
+    $direction = ($_GET['ages'] == 'DESC') ? 'DESC' : 'ASC';
+
+    $query = $pdo->prepare('SELECT * FROM users ORDER BY date_of_birth ' . $direction);
+    $query->execute();
     $resultas = $query->fetchAll();
 }else{
     $query = $pdo->query('SELECT * FROM users ORDER BY poste');
@@ -50,7 +50,6 @@ if(array_key_exists("user",$_SESSION)) {
                 unlink($filePath);
             }
         }
-
         header("Location:index.php");
         exit();
     }
@@ -74,18 +73,24 @@ if(array_key_exists("user",$_SESSION)) {
 <body>
 <?php
 include "blocks/header.php";
-var_dump($_SESSION);
 ?>
-<div class="container row m-auto">
+<h3 class="text-center"><?php
+    if (array_key_exists("postes",$_GET)) {
+        echo ($_GET['postes']);
+    }else{
+        echo ("<h2 class='text-center'>L'équipe de ouf !!!</h2>");
+    }
+?></h3>
+<div class="container row m-auto mb-5">
     <?php
     foreach ($resultas as $resulta) {
             $nomPernom = $resulta["name"] . " " . $resulta["firstname"];
-            echo('<div class="col-3 m-auto mt-5"><div class="card">
+            echo('<div class="col-3 mt-5"><div class="card">
         <img src="' . htmlspecialchars($resulta["image"]) . '" class="card-img-top" alt="...">
         <div class="card-body">
         <h5 class="card-title">' . htmlspecialchars($nomPernom) . '</h5>
         <p class="card-text">Date de Naissance : ' . htmlspecialchars($resulta["date_of_birth"]) . '</p>
-        <p class="card-text">Poste : ' . htmlspecialchars($resulta["poste"]) . '</p>');
+        <p class="card-text ' . htmlspecialchars($resulta["poste"]) . ' ">Poste : ' . htmlspecialchars($resulta["poste"]) . '</p>');
             if (array_key_exists("user", $_SESSION)) {
                 echo('<a class="btn btn-danger" href="?suprimer=' . htmlspecialchars($resulta["id"]) . '">Suprimer le joueur</a>
                     <a class="btn btn-success mt-2" href="edit.php?modifier=' . htmlspecialchars($resulta["id"]) . '">Modifier le joueur</a>');

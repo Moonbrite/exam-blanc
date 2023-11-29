@@ -36,19 +36,39 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li>
-                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?attq=true">Attaquant</a>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?postes=Attaquant">Attaquant</a>
                                     </li>
                                     <li>
-                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?def=true">Défenseur</a>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?postes=Défenseur">Défenseur</a>
                                     </li>
                                     <li>
-                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?Gardien=true">Gardien</a>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?postes=Gardien">Gardien</a>
                                     </li>
                                     <li>
-                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?Milieu=true">Milieu</a>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?postes=Milieu">Milieu</a>
                                     </li>
                                     <li>
-                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?Rien=true">Pas de Filtre</a>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php">Pas de Filtre</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul
+                    </div>
+                    <div class="navbar-collapse" id="navbarNavDarkDropdown">
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <button class="btn btn-dark dropdown-toggle no-border ps-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Filtré par age
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?ages=DESC">DESC</a>
+                                    </li>
+                                    <li>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php?ages=ASC">ASC</a>
+                                    </li>
+                                    <li>
+                                        <a class="text-decoration-none d-flex flex-column dropdown-item" href="index.php">Pas de Filtre</a>
                                     </li>
                                 </ul>
                             </li>
