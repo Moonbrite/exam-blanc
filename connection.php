@@ -50,13 +50,12 @@ if($_SERVER["REQUEST_METHOD"]=="POST") {
         <form class="" action="" method="post">
             <input class="form-control " type="text" name="user" placeholder="User" required="required" value="<?php
             if(!empty($_POST['user'])){
-                echo($_POST['user']);
+                echo(htmlspecialchars($_POST['user']));
             }
             ?>"/>
-
             <input id="pswd" class="form-control" type="password" name="password" placeholder="Mot de passe" required="required" value="<?php
             if(!empty($_POST['password'])){
-                echo($_POST['password']);
+                echo(htmlspecialchars($_POST['password']));
             }
             ?>"/>
             <button type="submit">Connexion</button>

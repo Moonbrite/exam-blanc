@@ -5,6 +5,7 @@ include "blocks/redirection.php";
 redirectionConnectionIsConected();
 $pdo = dbconnect();
 $errors = [];
+$types = ["Gardien","Attaquant","Milieu","Défenseur"];
 
 $query = $pdo->query('SELECT * FROM users');
 $resultas = $query->fetchAll();
@@ -20,18 +21,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $errors [] = "Pas bon";
     }
-    if (count($resultas) < 23 && count($errors) == 0) {
-        $nameAssets = "assets/" . uniqid() . '-' . $_FILES["photos"]["name"];
-        move_uploaded_file($_FILES["photos"]["tmp_name"], $nameAssets);
-        $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
-        $qury->execute([
-            "name" => $_POST['name'],
-            "firstname" => $_POST['lastname'],
-            "date_of_birth" => $_POST['date_of_birth'],
-            "poste" => $_POST['type'],
-            "image" => $nameAssets,
-        ]);
-        redirectionIndex();
+    if (count($resultas) < 23 && count($errors) == 0 ) {
+        if (!in_array($_POST["type"],$types)) {
+            $errors ["result"] = "Hop Hop jeune fourbe";
+        }else{
+            $nameAssets = "assets/" . uniqid() . '-' . $_FILES["photos"]["name"];
+            move_uploaded_file($_FILES["photos"]["tmp_name"], $nameAssets);
+            $qury = $pdo->prepare("INSERT INTO `foot_2_ouf`.`users` (`name`, `firstname`, `date_of_birth`, `poste`,`image`) VALUES (:name, :firstname, :date_of_birth, :poste, :image)");
+            $qury->execute([
+                "name" => $_POST['name'],
+                "firstname" => $_POST['lastname'],
+                "date_of_birth" => $_POST['date_of_birth'],
+                "poste" => $_POST['type'],
+                "image" => $nameAssets,
+            ]);
+            redirectionIndex();
+        }
     } else {
         $errors ["result"] = "La limite de 23 joueur et atteinte";
     }
@@ -78,7 +83,7 @@ include "blocks/header.php";
             }
             ?>" type="text" name="lastname" placeholder="Nom" required="required" value="<?php
             if(!empty($_POST['lastname'])){
-                echo($_POST['lastname']);
+                echo(htmlspecialchars($_POST['lastname']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -99,7 +104,7 @@ include "blocks/header.php";
             }
             ?>" type="text" name="name" placeholder="Prenom" required="required" value="<?php
             if(!empty($_POST['name'])){
-                echo($_POST['name']);
+                echo(htmlspecialchars($_POST['name']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -120,7 +125,7 @@ include "blocks/header.php";
             }
             ?>" type="date" name="date_of_birth" placeholder="Date de Naisance" required="required" value="<?php
             if(!empty($_POST['date_of_birth'])){
-                echo($_POST['date_of_birth']);
+                echo(htmlspecialchars($_POST['date_of_birth']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -134,7 +139,6 @@ include "blocks/header.php";
             <select name="type" class="form-select mb-3">
                 <option></option>
                 <?php
-                $types = ["Gardien","Attaquant","Milieu","Défenseur"];
                 foreach($types as $type){
                     if($_SERVER["REQUEST_METHOD"]=='POST' && $_POST["type"] == $type){
                         $actif = 'selected';

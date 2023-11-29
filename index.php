@@ -2,18 +2,13 @@
 session_start();
 include "blocks/function.php";
 $pdo = dbconnect();
+
 if (array_key_exists("postes",$_GET)) {
     $query = $pdo->prepare('SELECT * FROM users WHERE poste = :poste');
     $query->execute(["poste" => $_GET['postes']]);
     $resultas = $query->fetchAll();
-}else{
-    $query = $pdo->query('SELECT * FROM users ORDER BY poste');
-    $resultas = $query->fetchAll();
-}
-if (array_key_exists("ages", $_GET)) {
-    // Assurez-vous que la valeur passée dans $_GET['ages'] est soit "ASC" soit "DESC"
+}elseif (array_key_exists("ages", $_GET)) {
     $direction = ($_GET['ages'] == 'DESC') ? 'DESC' : 'ASC';
-
     $query = $pdo->prepare('SELECT * FROM users ORDER BY date_of_birth ' . $direction);
     $query->execute();
     $resultas = $query->fetchAll();
@@ -21,6 +16,7 @@ if (array_key_exists("ages", $_GET)) {
     $query = $pdo->query('SELECT * FROM users ORDER BY poste');
     $resultas = $query->fetchAll();
 }
+
 
 if(array_key_exists("user",$_SESSION)) {
     if (array_key_exists("suprimer",$_GET)){
@@ -77,15 +73,17 @@ include "blocks/header.php";
 <h3 class="text-center"><?php
     if (array_key_exists("postes",$_GET)) {
         echo ($_GET['postes']);
+    }elseif (array_key_exists("ages",$_GET)) {
+        echo ('Trier par Age :  '.$_GET['ages'].' ');
     }else{
-        echo ("<h2 class='text-center'>L'équipe de ouf !!!</h2>");
+        echo ("L'équipe de ouf !!!");
     }
 ?></h3>
 <div class="container row m-auto mb-5">
     <?php
     foreach ($resultas as $resulta) {
             $nomPernom = $resulta["name"] . " " . $resulta["firstname"];
-            echo('<div class="col-3 mt-5"><div class="card">
+            echo('<div class="col-lg-3 mt-5"><div class="card">
         <img src="' . htmlspecialchars($resulta["image"]) . '" class="card-img-top" alt="...">
         <div class="card-body">
         <h5 class="card-title">' . htmlspecialchars($nomPernom) . '</h5>
@@ -95,8 +93,7 @@ include "blocks/header.php";
                 echo('<a class="btn btn-danger" href="?suprimer=' . htmlspecialchars($resulta["id"]) . '">Suprimer le joueur</a>
                     <a class="btn btn-success mt-2" href="edit.php?modifier=' . htmlspecialchars($resulta["id"]) . '">Modifier le joueur</a>');
             }
-            echo('</div>
-</div></div>');
+            echo('</div></div></div>');
     }
     ?>
 </div>
@@ -104,12 +101,11 @@ include "blocks/header.php";
     <?php
     if (array_key_exists("user",$_SESSION)) {
         if (count($resultas) > 0 ) {
-
-            echo ('<div class="text-center"><h3>Tout suprimer</h3><a class="btn btn-danger text-center mb-3" href="?suprimertout=all">Suprimer tout les joueurs</a>');
+            echo ('<div class="text-center"><h3>Tout suprimer</h3><a class="btn btn-danger text-center mb-3" href="?suprimertout=all">Suprimer tout les joueurs</a></div>');
         }else{
             echo ('<h2>Pas de Joueur</h2>');
         }
-    }echo ("</div>")
+    }
     ?>
 
 <?php

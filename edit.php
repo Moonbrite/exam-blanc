@@ -18,28 +18,35 @@ if(array_key_exists("user",$_SESSION)) {
 
 $allwoedExtension =["image/jpeg","image/png"];
 if($_SERVER["REQUEST_METHOD"]=="POST") {
-    if ($_FILES["photos"]["error"] != 0){
-         $errors [] ="inconu";
-     }
-     if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
-         if ($_FILES["photos"]["size"]>2097152){
-             $errors [] = "tros grosse";
-         }
-     }else{
-         $errors [] = "Pas bon";
-     }
-    if (count($errors)== 0 and $_FILES["image"]["error"] != 4) {
-        var_dump($_FILES);
-        $nameAssets = "assets/".uniqid().'-'.$_FILES["photos"]["name"];
-        move_uploaded_file($_FILES["photos"]["tmp_name"],$nameAssets);
-        $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste , image = :image   WHERE  id = :id;");
+    var_dump($_FILES);
+    var_dump($errors);
+    if ($_FILES["photos"]["error"] != 0 and $_FILES["photos"]["error"] != 4){
+        $errors [] ="inconu";
+    }
+    if (in_array($_FILES["photos"]["type"],$allwoedExtension)){
+        if ($_FILES["photos"]["size"]>2097152){
+            $errors [] = "tros grosse";
+        }
+    }
+
+    if ($_FILES["photos"]["error"] != 4) {
+        $erros_uplod = $errors;
+        if (!empty($erros_uplod)){
+            $errors["image"] = $erros_uplod;
+        }
+    }
+
+    if (count($errors)== 0) {
+        if ($_FILES["image"]["error"] != 4) {
+            move_uploaded_file($_FILES["photos"]["tmp_name"],$result["image"]);
+        }
+        $qury = $pdo->prepare("UPDATE `foot_2_ouf`.`users` SET name = :name , firstname = :firstname , date_of_birth = :date_of_birth , poste = :poste WHERE  id = :id;");
         $qury ->execute([
             "id"=>$_GET['modifier'],
             "name"=>$_POST['name'],
             "firstname"=>$_POST['lastname'],
             "date_of_birth"=>$_POST['date_of_birth'],
             "poste"=>$_POST['type'],
-            "image"=>$nameAssets,
         ]);
         header('Location: index.php');
         exit();
@@ -80,10 +87,10 @@ include "blocks/header.php";
             }
             ?>" type="text" name="lastname" placeholder="Nom" required="required" value="<?php
             if(empty($_POST['lastname'])){
-                echo($result['firstname']);
+                echo(htmlspecialchars($result['firstname']));
             }
             elseif(!empty($_POST['lastname'] && $_SERVER["REQUEST_METHOD"]=='POST')){
-                echo($_POST['lastname']);
+                echo(htmlspecialchars($_POST['lastname']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -104,10 +111,10 @@ include "blocks/header.php";
             }
             ?>" type="text" name="name" placeholder="Prenom" required="required" value="<?php
             if(empty($_POST['name'])){
-                echo($result['name']);
+                echo(htmlspecialchars($result['name']));
             }
             elseif(!empty($_POST['name'] && $_SERVER["REQUEST_METHOD"]=='POST')){
-                echo($_POST['name']);
+                echo(htmlspecialchars($_POST['name']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -128,10 +135,10 @@ include "blocks/header.php";
             }
             ?>" type="date" name="date_of_birth" placeholder="Date de Naisance" required="required" value="<?php
             if(empty($_POST['date_of_birth'])){
-                echo($result['date_of_birth']);
+                echo(htmlspecialchars($result['date_of_birth']));
             }
             elseif(!empty($_POST['date_of_birth'] && $_SERVER["REQUEST_METHOD"]=='POST')){
-                echo($_POST['date_of_birth']);
+                echo(htmlspecialchars($_POST['date_of_birth']));
             }
             ?>"/>
             <div class='invalid-feedback msg'>
@@ -159,7 +166,7 @@ include "blocks/header.php";
             <div>
 
                 <?php
-                echo ('<img class="img-previsu img-thumbnail" src="'.$result["image"].'" alt="">');
+                echo ('<img class="img-previsu img-thumbnail mb-3" src="'.htmlspecialchars($result["image"]).'" alt="">');
                 ?>
             </div>
             <input type="file" class="form-control mb-3" name="photos">
