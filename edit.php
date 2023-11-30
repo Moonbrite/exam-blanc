@@ -18,8 +18,6 @@ if(array_key_exists("user",$_SESSION)) {
 
 $allwoedExtension =["image/jpeg","image/png"];
 if($_SERVER["REQUEST_METHOD"]=="POST") {
-    var_dump($_FILES);
-    var_dump($errors);
     if ($_FILES["photos"]["error"] != 0 and $_FILES["photos"]["error"] != 4){
         $errors [] ="inconu";
     }
@@ -164,7 +162,6 @@ include "blocks/header.php";
 
             <!---------------------------------------------------------------------------->
             <div>
-
                 <?php
                 echo ('<img class="img-previsu img-thumbnail mb-3" src="'.htmlspecialchars($result["image"]).'" alt="">');
                 ?>
